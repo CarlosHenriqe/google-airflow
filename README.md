@@ -1,1 +1,1 @@
-# api_spotify
+# spotify-api
