@@ -2,12 +2,3 @@ steps:
 - name: gcr.io/cloud-builders/gsutil
   args: ['cp', 'airflow/dags/*.py', '${_COMPOSER_DAG_BUCKET}']
   id: 'deploy-custom-operator'
-- name: gcr.io/cloud-builders/gsutil
-  args: ['echo', "intalling dependencies"]
-  id: 'install-dependencies'
-- name: gcr.io/cloud-builders/gsutil
-  args: ['echo', "testing...."]
-  id: 'test-dag'
-- name: gcr.io/cloud-builders/gsutil
-  args: ['echo', "deplying...."]
-  id: 'deploy-dag'
