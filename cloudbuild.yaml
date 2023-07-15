@@ -1,4 +1,4 @@
 steps:
 - name: gcr.io/cloud-builders/gsutil
-  args: ['cp', 'airflow/dags/*.py', '${_COMPOSER_DAG_BUCKET}']
+  args: ['cp', 'airflow/dags/*.py', 'gs://us-east1-airflow-boticario-327f50ab-bucket/dags']
   id: 'deploy-custom-operator'
