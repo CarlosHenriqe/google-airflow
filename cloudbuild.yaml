@@ -1,0 +1,10 @@
+steps:
+- name: gcr.io/cloud-builders/gsutil
+  args: ['echo', "intalling dependencies"]
+  id: 'install-dependencies'
+- name: gcr.io/cloud-builders/gsutil
+  args: ['echo', "testing...."]
+  id: 'test-dag'
+- name: gcr.io/cloud-builders/gsutil
+  args: ['echo', "deplying...."]
+  id: 'deploy-dag'
