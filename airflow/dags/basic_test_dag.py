@@ -13,7 +13,7 @@ dag = DAG(
 # Define a tarefa "Olá Mundo" usando o operador BashOperator
 hello_task = BashOperator(
     task_id='hello_task',
-    bash_command='echo "Olá Mundo"',
+    bash_command='echo "TESTANDO 123..."',
     dag=dag
 )
 

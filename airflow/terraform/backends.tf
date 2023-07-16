@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket  = "tf-state-case-boticario"
+    bucket  = "state-case-tf"
     prefix  = "terraform/state"
   }
   required_providers {

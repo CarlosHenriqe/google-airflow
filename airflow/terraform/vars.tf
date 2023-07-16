@@ -1,6 +1,6 @@
 variable "project_id" {
     type = string 
-    default = "my-first-case-393014"
+    default = "default-case"
 }
 
 variable "region" {
@@ -25,5 +25,5 @@ variable "subnetwork" {
 
 variable "image_version" {
     type = string 
-    default = "composer-2.0.32-airflow-2.3.4"
+    default = "composer-1.20.10-airflow-2.4.3"
 }
