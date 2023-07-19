@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from airflow import DAG
+from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyTableOperator
 from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
-from google.cloud import storage
 
 default_args = {
     'owner': 'airflow',
@@ -11,29 +11,48 @@ default_args = {
 }
 
 dag = DAG(
-    'update_sales_table_1',
+    'create_and_update_tables',
     default_args=default_args,
-    description='DAG to update Boticario tables in BigQuery',
+    description='DAG to create and update tables in BigQuery',
     schedule_interval=timedelta(minutes=30),  # Executar a cada 30 minutos
 )
 
-# Função para ler o SQL do arquivo update_query.sql no bucket
-def read_sql_from_file(bucket_name, file_path):
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket(bucket_name)
-    blob = bucket.blob(file_path)
-    sql_query = blob.download_as_text()
-    return sql_query
+# Define the SQL query to create the derived table
+create_table_sql = """
+WITH BASE_2017 AS (
+    SELECT DISTINCT 
+        EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA) AS ANO_MES,
+        SUM(QTD_VENDA) AS QTD_VENDAS
+    FROM `tabelas_boticario.base_2017`
+    GROUP BY EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA)
+),
+BASE_2019 AS (
+    SELECT DISTINCT 
+        EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA) AS ANO_MES,
+        SUM(QTD_VENDA) AS QTD_VENDAS
+    FROM `tabelas_boticario.base_2019`
+    GROUP BY EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA)
+)
+SELECT 
+    ANO_MES,
+    QTD_VENDAS
+FROM BASE_2017 
+UNION ALL 
+SELECT 
+    ANO_MES,
+    QTD_VENDAS
+FROM BASE_2019
+"""
 
-bucket_name = 'us-east1-airflow-gcp-54adddd8-bucket/dags/sales_sqls'  # Substitua pelo nome real do seu bucket
-file_path = 'us-east1-airflow-gcp-54adddd8-bucket/dags/sales_sqls/table_1.sql'  # Substitua pelo caminho real do arquivo no bucket
-sql_query = read_sql_from_file(bucket_name, file_path)
-
-update_bq_tables = BigQueryExecuteQueryOperator(
-    task_id='update_bq_table_1',
-    sql=sql_query,
+# Create the derived table using the BigQueryExecuteQueryOperator
+create_table = BigQueryExecuteQueryOperator(
+    task_id='create_derived_table',
+    sql=create_table_sql,
     use_legacy_sql=False,
+    destination_dataset_table='default-case.bd_boticario.consolidado_ano_mes', # Replace with your destination table
+    write_disposition='WRITE_TRUNCATE',
     dag=dag,
 )
 
-update_bq_tables
+# Define the dependencies between the tasks
+create_table
