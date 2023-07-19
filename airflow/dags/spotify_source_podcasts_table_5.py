@@ -20,20 +20,22 @@ def extract_from_api():
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
-        print("Dados obtidos com sucesso:")
-        # Criar DataFrame a partir do JSON
+        print("Data obtained successfully:")
+        # Create DataFrame from JSON
         df = pd.DataFrame(data)
-        # Selecionar apenas os campos desejados
+        # Select only the desired columns
         selected_columns = ["name", "description", "id", "total_episodes"]
         df_selected = df[selected_columns]
 
         return df_selected
     else:
-        print(f"Erro ao fazer a solicitação. Status code: {response.status_code}")
+        print(f"Error making the request. Status code: {response.status_code}")
 
 def save_df_to_gcs():
     df = extract_from_api()
     csv_data = df.to_csv(index=False)
+    print("CSV data:")
+    print(csv_data)
     gcs_hook = GCSHook(gcp_conn_id='google_cloud_datastore_default')
     gcs_hook.upload(
         bucket_name='spotify-tables',
@@ -41,6 +43,7 @@ def save_df_to_gcs():
         data=csv_data.encode('utf-8'),
         mime_type='text/csv'
     )
+    print("Data uploaded to GCS successfully.")
 
 def create_bigquery_table():
 
@@ -56,7 +59,6 @@ def create_bigquery_table():
         bigquery.SchemaField('total_episodes', 'INTEGER', mode='NULLABLE'),
     ]
 
-
     bucket_path = 'gs://spotify-tables/podcasts-table-5/df.csv'
 
     job_config = bigquery.LoadJobConfig(
@@ -66,31 +68,32 @@ def create_bigquery_table():
     )
 
     bq_hook.delete_table(project_id, dataset_id, table_id, not_found_ok=True)
+    print("Table deleted successfully.")
     bq_hook.create_empty_table(project_id, dataset_id, table_id, schema)
+    print("Empty table created successfully.")
     bq_hook.load_table_from_uri(bucket_path, project_id, dataset_id, table_id, job_config=job_config)
-
-
+    print("Data loaded into BigQuery table successfully.")
 
 dag = DAG(
-    dag_id = 'spotify_source_table_5', 
+    dag_id='spotify_source_table_5',
     default_args=default_args,
-    start_date= datetime(2023,1,1),
-    catchup = False,
-    max_active_runs = 1,
-    tags = ['spotify', 'source']
+    start_date=datetime(2023, 1, 1),
+    catchup=False,
+    max_active_runs=1,
+    tags=['spotify', 'source']
 )
 
-# Tarefa para salvar o DataFrame diretamente no Google Cloud Storage
+# Task to save the DataFrame directly to Google Cloud Storage
 extract_task = PythonOperator(
-    task_id='exctract',
+    task_id='extract',
     python_callable=save_df_to_gcs,
-    dag = dag
+    dag=dag
 )
 
 load_task = PythonOperator(
     task_id='load',
     python_callable=create_bigquery_table,
-    dag = dag
+    dag=dag
 )
 
 extract_task >> load_task
