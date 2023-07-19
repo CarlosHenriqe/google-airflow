@@ -32,7 +32,7 @@ def extract_from_api():
 def save_df_to_gcs():
     df = extract_from_api()
     csv_data = df.to_csv(index=False)
-    gcs_hook = GoogleCloudStorageHook(google_cloud_storage_conn_id='your_gcp_connection')
+    gcs_hook = GoogleCloudStorageHook(google_cloud_storage_conn_id='google_cloud_datastore_default')
     gcs_hook.upload(
         bucket='spotify-tables/podcasts-table-5',
         object='df.csv',
