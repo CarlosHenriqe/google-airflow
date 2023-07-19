@@ -26,7 +26,7 @@ def read_sql_from_file(bucket_name, file_path):
     return sql_query
 
 bucket_name = 'us-east1-airflow-gcp-54adddd8-bucket/dags/sales_sqls'  # Substitua pelo nome real do seu bucket
-file_path = 'table_1.sql'  # Substitua pelo caminho real do arquivo no bucket
+file_path = 'us-east1-airflow-gcp-54adddd8-bucket/dags/sales_sqls/table_1.sql'  # Substitua pelo caminho real do arquivo no bucket
 sql_query = read_sql_from_file(bucket_name, file_path)
 
 update_bq_tables = BigQueryExecuteQueryOperator(
