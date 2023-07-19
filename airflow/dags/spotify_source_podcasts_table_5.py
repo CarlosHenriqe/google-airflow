@@ -34,14 +34,13 @@ def save_df_to_gcs():
     csv_data = df.to_csv(index=False)
     gcs_hook = GoogleCloudStorageHook(google_cloud_storage_conn_id='your_gcp_connection')
     gcs_hook.upload(
-        bucket='your_destination_bucket',
+        bucket='spotify-tables/podcasts-table-5',
         object='df.csv',
         data=csv_data.encode('utf-8'),
         mime_type='text/csv'
     )
 
 with DAG('write_df_to_csv', default_args=default_args, schedule_interval='@hourly') as dag:
-
 
     # Tarefa para salvar o DataFrame diretamente no Google Cloud Storage
     save_df_gcs = PythonOperator(
