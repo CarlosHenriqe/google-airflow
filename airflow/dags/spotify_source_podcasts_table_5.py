@@ -62,7 +62,7 @@ extract_task = PythonOperator(
 )
 
 load_task = PythonOperator(
-    task_id='exctract',
+    task_id='load',
     python_callable=test,
     dag = dag
 )
