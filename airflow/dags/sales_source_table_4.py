@@ -10,7 +10,7 @@ default_args = {
 }
 
 dag = DAG(
-    'update_consolidado_ano_mes',
+    'update_consolidado_linha_ano_mes',
     default_args=default_args,
     description='DAG to create and update consolidated table in BigQuery',
     catchup=False,
@@ -21,35 +21,39 @@ dag = DAG(
 sql_query = """
 WITH BASE_2017 AS (
     SELECT DISTINCT 
+        LINHA,
         EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA) AS ANO_MES,
         SUM(QTD_VENDA) AS QTD_VENDAS
     FROM `default-case.bd_boticario.base_2017`
-    GROUP BY EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA)
+    GROUP BY LINHA, EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA)
 ),
 BASE_2019 AS (
     SELECT DISTINCT 
+        LINHA,
         EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA) AS ANO_MES,
         SUM(QTD_VENDA) AS QTD_VENDAS
     FROM `default-case.bd_boticario.base_2019`
-    GROUP BY EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA)
+    GROUP BY LINHA, EXTRACT(YEAR FROM DATA_VENDA) || "-" || EXTRACT(MONTH FROM DATA_VENDA)
 )
 SELECT 
     ANO_MES,
+    LINHA,
     QTD_VENDAS
 FROM BASE_2017 
 UNION ALL 
 SELECT 
     ANO_MES,
+    LINHA,
     QTD_VENDAS
 FROM BASE_2019
 """
 
 # Create/Update the consolidated table using the BigQueryExecuteQueryOperator
 update_table = BigQueryExecuteQueryOperator(
-    task_id='update_consolidado_ano_mes',
+    task_id='update_consolidado_linha_ano_mes',
     sql=sql_query,
     use_legacy_sql=False,
-    destination_dataset_table='default-case.bd_boticario.consolidado_ano_mes', # Replace with your destination table
+    destination_dataset_table='default-case.bd_boticario.consolidado_linha_ano_mes', # Replace with your destination table
     write_disposition='WRITE_TRUNCATE',  # Use 'WRITE_TRUNCATE' to update the table
     dag=dag,
 )
