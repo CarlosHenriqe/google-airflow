@@ -11,7 +11,7 @@ default_args = {
 }
 
 dag = DAG(
-    'update_boticario_table 1',
+    'update_sales_table_1',
     default_args=default_args,
     description='DAG to update Boticario tables in BigQuery',
     schedule_interval=timedelta(minutes=30),  # Executar a cada 30 minutos
