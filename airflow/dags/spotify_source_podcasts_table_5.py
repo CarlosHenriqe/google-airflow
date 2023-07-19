@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
+from airflow.providers.google.cloud.hooks.gcs import GCSHook
 import requests
 import pandas as pd
 
@@ -36,7 +36,7 @@ def test():
 def save_df_to_gcs():
     df = extract_from_api()
     csv_data = df.to_csv(index=False)
-    gcs_hook = GoogleCloudStorageHook(google_cloud_storage_conn_id='google_cloud_datastore_default')
+    gcs_hook = GCSHook(gcp_conn_id='google_cloud_datastore_default')
     gcs_hook.upload(
         bucket='spotify-tables/podcasts-table-5',
         object='df.csv',
@@ -53,7 +53,7 @@ dag = DAG(
     tags = ['spotify', 'source']
 )
 
-    # Tarefa para salvar o DataFrame diretamente no Google Cloud Storage
+# Tarefa para salvar o DataFrame diretamente no Google Cloud Storage
 extract_task = PythonOperator(
     task_id='exctract',
     python_callable=save_df_to_gcs,
