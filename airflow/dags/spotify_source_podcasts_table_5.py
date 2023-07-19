@@ -7,7 +7,7 @@ import pandas as pd
 
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2023, 7, 20),
+    'start_date': datetime(2023, 1, 1),
     'retries': 1,
     'retry_delay': timedelta(minutes=5)
 }
