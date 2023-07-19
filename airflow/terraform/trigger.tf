@@ -25,6 +25,6 @@ resource "google_cloudbuild_trigger" "trigger-build-dags" {
   filename = "./cloudbuild.yaml"
 
   included_files = [
-    "dags/**"
+    "airflow/dags/**"
   ]
 }

@@ -21,6 +21,7 @@ module "composer" {
     pandas-gbq = ">=0.17.0"
     google-auth-oauthlib = ">=0.4.1,<0.5"
     tensorboard = ">=2.8.0"
+    apache-airflow-providers-google=">=2.3.0"
   }
 
   depends_on = [

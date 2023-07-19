@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.google.cloud.hooks.gcs import GoogleCloudStorageHook
+from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
 import requests
 import pandas as pd
 
