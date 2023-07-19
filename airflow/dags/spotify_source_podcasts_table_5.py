@@ -47,7 +47,6 @@ def save_df_to_gcs():
 
 def create_bigquery_table():
 
-    bq_hook = BigQueryHook(bigquery_conn_id='google_cloud_default')
     project_id = 'default-case'
     dataset_id = 'bd_boticario'
     table_id = 'spotify_source_table_5'
@@ -67,11 +66,13 @@ def create_bigquery_table():
         skip_leading_rows=1
     )
 
-    bq_hook.delete_table(project_id, dataset_id, table_id, not_found_ok=True)
+    bq_client = bigquery.Client(project=project_id)
+    bq_client.delete_table(f"{project_id}.{dataset_id}.{table_id}", not_found_ok=True)
     print("Table deleted successfully.")
-    bq_hook.create_empty_table(project_id, dataset_id, table_id, schema)
+    bq_client.create_table(bigquery.Table(f"{project_id}.{dataset_id}.{table_id}", schema=schema))
     print("Empty table created successfully.")
-    bq_hook.load_table_from_uri(bucket_path, project_id, dataset_id, table_id, job_config=job_config)
+    job = bq_client.load_table_from_uri(bucket_path, f"{project_id}.{dataset_id}.{table_id}", job_config=job_config)
+    job.result()  # Wait for the job to complete
     print("Data loaded into BigQuery table successfully.")
 
 dag = DAG(
