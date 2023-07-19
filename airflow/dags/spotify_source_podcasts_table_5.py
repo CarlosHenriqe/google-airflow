@@ -4,6 +4,7 @@ from airflow.operators.python import PythonOperator
 from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
 import requests
 import pandas as pd
+airflow.utils.dates import days_ago
 
 default_args = {
     'owner': 'airflow',
@@ -48,7 +49,7 @@ dag = DAG(
     dag_id = 'write_table_5', 
     default_args=default_args, 
     schedule_interval="0 3 * * *",
-    start_date= datetime.datetime(2023,1,1),
+    start_date= days_ago(10),
     catchup = False,
     max_active_runs = 1,
     tags = ['spotify', 'source']
