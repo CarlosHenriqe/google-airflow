@@ -40,12 +40,22 @@ def save_df_to_gcs():
         mime_type='text/csv'
     )
 
-with DAG('write_df_to_csv', default_args=default_args, schedule_interval='@hourly') as dag:
+dag = DAG(
+    dag_id = 'write_table_5', 
+    default_args=default_args, 
+    schedule_interval='@hourly',
+    start_date= datetime(2023,1,1),
+    catchup = False,
+    max_active_runs = 1,
+    tags = ['spotify', 'source']
+)
 
     # Tarefa para salvar o DataFrame diretamente no Google Cloud Storage
-    save_df_gcs = PythonOperator(
-        task_id='save_df_gcs',
-        python_callable=save_df_to_gcs
-    )
+extract_task = PythonOperator(
+    task_id='exctract',
+    python_callable=save_df_to_gcs,
+    dag = dag
+)
 
-    save_df_gcs
+extract_task
+globals()[dag.dag_id] = dag
