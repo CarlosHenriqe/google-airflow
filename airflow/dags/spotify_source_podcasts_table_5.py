@@ -47,8 +47,8 @@ def save_df_to_gcs():
 dag = DAG(
     dag_id = 'write_table_5', 
     default_args=default_args, 
-    schedule_interval='@hourly',
-    start_date= '2023/01/01',
+    schedule_interval="0 3 * * *",
+    start_date= datetime.datetime(2023,1,1),
     catchup = False,
     max_active_runs = 1,
     tags = ['spotify', 'source']
