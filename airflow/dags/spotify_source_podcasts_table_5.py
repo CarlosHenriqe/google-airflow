@@ -38,11 +38,12 @@ def save_df_to_gcs():
     csv_data = df.to_csv(index=False)
     gcs_hook = GCSHook(gcp_conn_id='google_cloud_datastore_default')
     gcs_hook.upload(
-        bucket='spotify-tables/podcasts-table-5',
-        object='df.csv',
+        bucket_name='spotify-tables',
+        object_name='podcasts-table-5/df.csv',
         data=csv_data.encode('utf-8'),
         mime_type='text/csv'
     )
+
 
 dag = DAG(
     dag_id = 'write_table_5', 
