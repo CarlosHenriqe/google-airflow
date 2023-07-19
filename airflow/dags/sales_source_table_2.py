@@ -10,7 +10,7 @@ default_args = {
 }
 
 dag = DAG(
-    'update_consolidado_linha_ano_mes',
+    'update_consolidado_marca_linha',
     default_args=default_args,
     description='DAG to create and update consolidated table in BigQuery',
     catchup=False,
@@ -20,50 +20,54 @@ dag = DAG(
 # Define the SQL query to create/update the consolidated table
 sql_query = """
 WITH BASE_2017 AS (
-SELECT DISTINCT 
-  LINHA,
-  EXTRACT(YEAR FROM DATA_VENDA) AS ANO,
-  EXTRACT(MONTH FROM DATA_VENDA) AS MES,
-  SUM(QTD_VENDA) AS QTD_VENDAS
-FROM `default-case.bd_boticario.base_2017`
-GROUP BY
-  LINHA,
-  EXTRACT(YEAR FROM DATA_VENDA),
-  EXTRACT(MONTH FROM DATA_VENDA)
+  SELECT DISTINCT
+    MARCA,
+    LINHA,
+    SUM(QTD_VENDA) AS QTD_VENDAS
+  FROM `default-case.bd_boticario.base_2017`
+  GROUP BY
+    MARCA,
+    LINHA
 ),
 BASE_2019 AS (
-SELECT DISTINCT 
-  LINHA,
-  EXTRACT(YEAR FROM DATA_VENDA) AS ANO,
-  EXTRACT(MONTH FROM DATA_VENDA) AS MES,
-  SUM(QTD_VENDA) AS QTD_VENDAS
-FROM `default-case.bd_boticario.base_2019`
-GROUP BY
-  LINHA,
-  EXTRACT(YEAR FROM DATA_VENDA),
-  EXTRACT(MONTH FROM DATA_VENDA)
-)
+  SELECT DISTINCT
+    MARCA,
+    LINHA,
+    SUM(QTD_VENDA) AS QTD_VENDAS
+  FROM `default-case.bd_boticario.base_2019`
+  GROUP BY
+    MARCA,
+    LINHA
+),
+BASE_GERAL AS (
 SELECT 
-  ANO,
-  MES,
+  MARCA,
   LINHA,
   QTD_VENDAS
 FROM BASE_2017 
-UNION ALL 
+UNION ALL
 SELECT 
-  ANO,
-  MES,
+  MARCA,
   LINHA,
   QTD_VENDAS
 FROM BASE_2019
+)
+SELECT 
+  MARCA,
+  LINHA,
+  SUM(BASE_GERAL.QTD_VENDAS) AS QTD_VENDAS
+FROM BASE_GERAL
+GROUP BY
+  MARCA,
+  LINHA
 """
 
 # Create/Update the consolidated table using the BigQueryExecuteQueryOperator
 update_table = BigQueryExecuteQueryOperator(
-    task_id='update_consolidado_linha_ano_mes',
+    task_id='update_consolidado_marca_linha',
     sql=sql_query,
     use_legacy_sql=False,
-    destination_dataset_table='default-case.bd_boticario.consolidado_linha_ano_mes', # Replace with your destination table
+    destination_dataset_table='default-case.bd_boticario.consolidado_marca_linha', # Replace with your destination table
     write_disposition='WRITE_TRUNCATE',  # Use 'WRITE_TRUNCATE' to update the table
     dag=dag,
 )
