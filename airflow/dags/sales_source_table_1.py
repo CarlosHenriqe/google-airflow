@@ -1,13 +1,11 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
-import datetime
 from google.cloud import storage
 
 default_args = {
     'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': datetime(2023,1,1),
+    'start_date': datetime(2023, 1, 1),
     'retries': 1,
     'retry_delay': timedelta(minutes=5)
 }
