@@ -11,7 +11,7 @@ default_args = {
 }
 
 dag = DAG(
-    'create_and_update_tables',
+    'consolidado_ano_mes',
     default_args=default_args,
     description='DAG to create and update tables in BigQuery',
     schedule_interval=timedelta(minutes=30),  # Executar a cada 30 minutos
