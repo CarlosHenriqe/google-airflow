@@ -9,7 +9,7 @@ default_args = {
     'owner': 'airflow',
     'start_date': datetime(2023, 7, 20),
     'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retry_delay': timedelta(minutes=5)
 }
 
 def extract_from_api():
@@ -28,6 +28,10 @@ def extract_from_api():
         return df_selected
     else:
         print(f"Erro ao fazer a solicitação. Status code: {response.status_code}")
+
+def test():
+    print('deu certo')
+    return 
 
 def save_df_to_gcs():
     df = extract_from_api()
@@ -57,5 +61,11 @@ extract_task = PythonOperator(
     dag = dag
 )
 
-extract_task
+load_task = PythonOperator(
+    task_id='exctract',
+    python_callable=test,
+    dag = dag
+)
+
+extract_task >> load_task
 globals()[dag.dag_id] = dag
