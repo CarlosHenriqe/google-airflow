@@ -64,3 +64,4 @@ update_table = BigQueryExecuteQueryOperator(
 
 # Define the dependencies between the tasks
 update_table
+#testando dag
